@@ -1,9 +1,9 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { addTask } from "../../actions/task";
 import { Button } from "../lib/Button";
 import { Input } from "../lib/Input";
 import "./newTaskForm.css";
+import { useTaskContext } from "./TaskContextProvider";
 
 /* export function TodoForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,7 +52,41 @@ function NewTaskFormButton() {
 
 export function NewTaskForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [state, addTaskAction] = useActionState(addTask, initialState);
+  const { forceUpdate } = useTaskContext();
+  const [state, addTaskAction] = useActionState(
+    async (
+      previousState: { error: string; success: string },
+      formData: FormData
+    ) => {
+      const task = formData.get("task") as string;
+
+      if (task.trim().length === 0) {
+        return { ...previousState, success: "", error: "Task cannot be empty" };
+      }
+
+      const payload = { task };
+
+      try {
+        const response = await fetch("http://localhost:5000/tasks", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+
+        await response.json();
+
+        forceUpdate();
+
+        return {
+          ...previousState,
+          error: "",
+          success: "Task added successfully",
+        };
+      } catch (error) {
+        return { ...previousState, success: "", error: "Failed to add task" };
+      }
+    },
+    initialState
+  );
 
   useEffect(() => {
     inputRef.current?.focus();
