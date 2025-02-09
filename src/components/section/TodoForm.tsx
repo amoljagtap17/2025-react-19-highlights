@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Button } from "../lib/Button";
 import { Input } from "../lib/Input";
 import "./styles.css";
 
@@ -18,7 +19,7 @@ export function TodoForm() {
           placeholder="Add New Task"
           ref={inputRef}
         />
-        <button type="submit">Add</button>
+        <Button type="submit">Add</Button>
       </form>
     </div>
   );
