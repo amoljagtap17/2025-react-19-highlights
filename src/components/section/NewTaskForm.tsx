@@ -1,8 +1,9 @@
 import { useActionState, useEffect, useRef } from "react";
+import { useFormStatus } from "react-dom";
 import { addTask } from "../../actions/task";
 import { Button } from "../lib/Button";
 import { Input } from "../lib/Input";
-import "./styles.css";
+import "./newTaskForm.css";
 
 /* export function TodoForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,12 +40,19 @@ import "./styles.css";
 
 const initialState = { error: "", success: "" };
 
+function NewTaskFormButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" disabled={pending}>
+      Add
+    </Button>
+  );
+}
+
 export function NewTaskForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [state, addTaskAction, isPending] = useActionState(
-    addTask,
-    initialState
-  );
+  const [state, addTaskAction] = useActionState(addTask, initialState);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -59,9 +67,7 @@ export function NewTaskForm() {
           placeholder="Add New Task"
           ref={inputRef}
         />
-        <Button type="submit" disabled={isPending}>
-          Add
-        </Button>
+        <NewTaskFormButton />
       </form>
       {state.error && <p className="error">{state.error}</p>}
       {state.success && <p className="success">{state.success}</p>}
