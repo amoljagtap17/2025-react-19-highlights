@@ -1,0 +1,10 @@
+.error-fallback p {
+  color: red;
+  font-size: 2rem;
+  font-weight: 900;
+}
+
+.error-fallback pre {
+  font-size: 1.2rem;
+  color: red;
+}

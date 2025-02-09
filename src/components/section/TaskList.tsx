@@ -1,4 +1,6 @@
-import { use } from "react";
+import { Suspense, use } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { ErrorFallback } from "../lib/ErrorFallback";
 import "./TaskList.css";
 
 const fetchTasks = (async () => {
@@ -12,7 +14,7 @@ function TaskList() {
   const tasks = use(fetchTasks);
 
   return (
-    <div className="task-list">
+    <div>
       <h1>Task List</h1>
       <ul className="task-list__list">
         {tasks.map(({ id, task }: { id: string; task: string }) => (
@@ -27,8 +29,12 @@ function TaskList() {
 
 export function TaskListContainer() {
   return (
-    <div>
-      <TaskList />
+    <div className="task-list">
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <TaskList />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }
