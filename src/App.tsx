@@ -1,9 +1,9 @@
-import { TodoForm } from "./components/section/TodoForm";
+import { NewTaskForm } from "./components/section/NewTaskForm";
 
 export function App() {
   return (
     <div>
-      <TodoForm />
+      <NewTaskForm />
     </div>
   );
 }

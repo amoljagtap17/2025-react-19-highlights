@@ -6,4 +6,10 @@ button {
   border-radius: var(--size-radius);
   font-weight: 900;
   min-width: 8rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -14,7 +14,7 @@ export function Input({ ref, label, name, ...props }: IInputProps) {
   return (
     <div>
       <label htmlFor={inputId}>{label}</label>
-      <input id={inputId} ref={ref} {...props} />
+      <input id={inputId} name={name} ref={ref} {...props} />
     </div>
   );
 }

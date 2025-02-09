@@ -7,7 +7,6 @@ import "./index.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <div className="container">
-      <h1>Todo App</h1>
       <App />
     </div>
   </StrictMode>
