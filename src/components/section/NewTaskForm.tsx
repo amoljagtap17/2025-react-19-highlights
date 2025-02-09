@@ -3,7 +3,6 @@ import { useFormStatus } from "react-dom";
 import { Button } from "../lib/Button";
 import { Input } from "../lib/Input";
 import "./newTaskForm.css";
-import { useTaskContext } from "./TaskContextProvider";
 
 /* export function TodoForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,7 +51,6 @@ function NewTaskFormButton() {
 
 export function NewTaskForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { forceUpdate } = useTaskContext();
   const [state, addTaskAction] = useActionState(
     async (
       previousState: { error: string; success: string },
@@ -73,8 +71,6 @@ export function NewTaskForm() {
         });
 
         await response.json();
-
-        forceUpdate();
 
         return {
           ...previousState,

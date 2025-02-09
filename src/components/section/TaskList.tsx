@@ -1,48 +1,51 @@
-import { Suspense, use, useCallback } from "react";
+import { Suspense, use, useReducer } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { Button } from "../lib/Button";
 import { ErrorFallback } from "../lib/ErrorFallback";
-import { useTaskContext } from "./TaskContextProvider";
 import "./TaskList.css";
 import { ITask } from "./types";
 
-interface ITaskListProps {
-  fetchTasks: Promise<ITask[]>;
-}
-
-function TaskList({ fetchTasks }: ITaskListProps) {
+function TaskList({ fetchTasks }: { fetchTasks: Promise<ITask[]> }) {
   const tasks = use(fetchTasks);
 
   return (
-    <div>
-      <h1>Task List</h1>
-      <ul className="task-list__list">
-        {tasks.map(({ id, task }) => (
-          <li key={id} className="task-list__list-item">
-            {task}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <ul className="task-list__list">
+      {tasks.map(({ id, task }) => (
+        <li key={id} className="task-list__list-item">
+          {task}
+        </li>
+      ))}
+    </ul>
   );
 }
 
-const fetchTasksApi = async () => {
-  const response = await fetch("http://localhost:5000/tasks");
-  const tasks: ITask[] = await response.json();
-
-  return tasks;
-};
-
 export function TaskListContainer() {
-  const { updateCount } = useTaskContext();
+  const [version, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const fetchTasksPromise = useCallback(fetchTasksApi, []);
+  const fetchTasksPromise = (async () => {
+    const response = await fetch("http://localhost:5000/tasks");
+    const tasks: ITask[] = await response.json();
+
+    return tasks;
+  })();
 
   return (
-    <div className="task-list" key={updateCount}>
+    <div className="task-list" key={version}>
+      <div className="task-list__header">
+        <h1>Task List</h1>
+        <Button
+          onClick={() => {
+            forceUpdate();
+          }}
+          disabled={false}
+        >
+          Refresh
+        </Button>
+      </div>
+
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Suspense fallback={<div>Loading...</div>}>
-          <TaskList fetchTasks={fetchTasksPromise()} />
+          <TaskList fetchTasks={fetchTasksPromise} />
         </Suspense>
       </ErrorBoundary>
     </div>
