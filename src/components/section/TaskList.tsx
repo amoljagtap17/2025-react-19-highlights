@@ -2,13 +2,13 @@ import { Suspense, use, useReducer } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Button } from "../lib/Button";
 import { ErrorFallback } from "../lib/ErrorFallback";
-import { useTaskContext } from "./TaskContextProvider";
+import { useTaskStateContext } from "./TaskContextProvider";
 import "./TaskList.css";
 import { ITask } from "./types";
 
 function TaskList({ fetchTasks }: { fetchTasks: Promise<ITask[]> }) {
   const tasks = use(fetchTasks);
-  const { optimisticTasks } = useTaskContext();
+  const { optimisticTasks } = useTaskStateContext();
 
   const newTasks = [...tasks, ...optimisticTasks];
 
