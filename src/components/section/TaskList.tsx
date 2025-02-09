@@ -2,15 +2,19 @@ import { Suspense, use, useReducer } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Button } from "../lib/Button";
 import { ErrorFallback } from "../lib/ErrorFallback";
+import { useTaskContext } from "./TaskContextProvider";
 import "./TaskList.css";
 import { ITask } from "./types";
 
 function TaskList({ fetchTasks }: { fetchTasks: Promise<ITask[]> }) {
   const tasks = use(fetchTasks);
+  const { optimisticTasks } = useTaskContext();
+
+  const newTasks = [...tasks, ...optimisticTasks];
 
   return (
     <ul className="task-list__list">
-      {tasks.map(({ id, task }) => (
+      {newTasks.map(({ id, task }) => (
         <li key={id} className="task-list__list-item">
           {task}
         </li>

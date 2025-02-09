@@ -1,8 +1,9 @@
-import { createContext, useContext, useReducer } from "react";
+import { createContext, useContext, useOptimistic } from "react";
+import { ITask } from "./types";
 
 type TaskContextType = {
-  updateCount: number;
-  forceUpdate: React.ActionDispatch<[]>;
+  optimisticTasks: ITask[];
+  setOptimisticTasks: (action: ITask) => void;
 };
 
 const TaskContext = createContext<TaskContextType | null>(null);
@@ -12,10 +13,15 @@ interface ITaskContextProviderProps {
 }
 
 export function TaskContextProvider({ children }: ITaskContextProviderProps) {
-  const [updateCount, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [optimisticTasks, setOptimisticTasks] = useOptimistic(
+    [],
+    (tasks: ITask[], newTask: ITask) => [...tasks, newTask]
+  );
 
   return (
-    <TaskContext value={{ updateCount, forceUpdate }}>{children}</TaskContext>
+    <TaskContext value={{ optimisticTasks, setOptimisticTasks }}>
+      {children}
+    </TaskContext>
   );
 }
 
