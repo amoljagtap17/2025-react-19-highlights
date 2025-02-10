@@ -1,55 +1,61 @@
-import { createContext, useContext, useOptimistic } from "react";
+import { createContext, useContext, useOptimistic, useState } from "react";
+import { fetchTasks } from "../../api/task";
 import { ITask } from "./types";
 
-type TaskStateContextType = {
+type TaskContextType = {
+  taskPromise: Promise<ITask[]>;
+  order: "asc" | "desc";
+  updateOrder: (order: "asc" | "desc") => void;
+  refetchTasks: () => void;
   optimisticTasks: ITask[];
+  addOptimisticTasks: (action: ITask) => void;
 };
 
-type TaskDispatchContextType = {
-  setOptimisticTasks: (action: ITask) => void;
-};
-
-const TaskStateContext = createContext<TaskStateContextType | null>(null);
-const TaskDispatchContext = createContext<TaskDispatchContextType | null>(null);
+export const TaskContext = createContext<TaskContextType | null>(null);
 
 interface ITaskContextProviderProps {
   children: React.ReactNode;
+  taskPromise: Promise<ITask[]>;
 }
 
-export function TaskContextProvider({ children }: ITaskContextProviderProps) {
-  const [optimisticTasks, setOptimisticTasks] = useOptimistic(
+export function TaskContextProvider({
+  children,
+  taskPromise,
+}: ITaskContextProviderProps) {
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [taskPromiseState, setTaskPromiseState] = useState(taskPromise);
+
+  const [optimisticTasks, addOptimisticTasks] = useOptimistic(
     [],
     (tasks: ITask[], newTask: ITask) => [...tasks, newTask]
   );
 
-  return (
-    <TaskStateContext value={{ optimisticTasks }}>
-      <TaskDispatchContext value={{ setOptimisticTasks }}>
-        {children}
-      </TaskDispatchContext>
-    </TaskStateContext>
-  );
+  const refetchTasks = () => {
+    setTaskPromiseState(fetchTasks(order));
+  };
+
+  const updateOrder = (newOrder: "asc" | "desc") => {
+    setOrder(newOrder);
+    setTaskPromiseState(fetchTasks(newOrder));
+  };
+
+  const value = {
+    taskPromise: taskPromiseState,
+    order,
+    updateOrder,
+    refetchTasks,
+    optimisticTasks,
+    addOptimisticTasks,
+  };
+
+  return <TaskContext value={value}>{children}</TaskContext>;
 }
 
-export function useTaskStateContext() {
-  const context = useContext(TaskStateContext);
+export function useTaskContext() {
+  const context = useContext(TaskContext);
 
   if (!context) {
-    throw new Error(
-      "useTaskStateContext must be used within a TaskStateContext"
-    );
-  }
-
-  return context;
-}
-
-export function useTaskDispatchContext() {
-  const context = useContext(TaskDispatchContext);
-
-  if (!context) {
-    throw new Error(
-      "useTaskDispatchContext must be used within a TaskDispatchContext"
-    );
+    throw new Error("useTaskContext must be used within a TaskContext");
   }
 
   return context;

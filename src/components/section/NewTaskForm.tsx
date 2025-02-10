@@ -3,7 +3,7 @@ import { useFormStatus } from "react-dom";
 import { Button } from "../lib/Button";
 import { Input } from "../lib/Input";
 import "./newTaskForm.css";
-import { useTaskDispatchContext } from "./TaskContextProvider";
+import { useTaskContext } from "./TaskContextProvider";
 
 /* export function TodoForm() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,7 +52,7 @@ function NewTaskFormButton() {
 
 export function NewTaskForm() {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { setOptimisticTasks } = useTaskDispatchContext();
+  const { addOptimisticTasks, refetchTasks } = useTaskContext();
   const [state, addTaskAction] = useActionState(
     async (
       previousState: { error: string; success: string },
@@ -66,7 +66,7 @@ export function NewTaskForm() {
 
       const payload = { task };
 
-      setOptimisticTasks({ id: Date.now().toString(), task });
+      addOptimisticTasks({ id: Date.now().toString(), task });
 
       try {
         const response = await fetch("http://localhost:5000/tasks", {
@@ -75,6 +75,8 @@ export function NewTaskForm() {
         });
 
         await response.json();
+
+        refetchTasks();
 
         return {
           ...previousState,
