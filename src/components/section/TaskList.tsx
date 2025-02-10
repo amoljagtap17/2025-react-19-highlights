@@ -1,7 +1,15 @@
-import { Suspense, use, useReducer } from "react";
+import {
+  Suspense,
+  use,
+  useCallback,
+  useDeferredValue,
+  useReducer,
+  useState,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Button } from "../lib/Button";
 import { ErrorFallback } from "../lib/ErrorFallback";
+import { Select } from "../lib/Select";
 import { useTaskStateContext } from "./TaskContextProvider";
 import "./TaskList.css";
 import { ITask } from "./types";
@@ -23,18 +31,29 @@ function TaskList({ fetchTasks }: { fetchTasks: Promise<ITask[]> }) {
   );
 }
 
-export function TaskListContainer() {
+const options = [
+  { label: "Ascending", value: "asc" },
+  { label: "Descending", value: "desc" },
+];
+
+interface ITaskListContainerProps {
+  sort: string;
+}
+
+function TaskListContainer({ sort }: ITaskListContainerProps) {
   const [version, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  const fetchTasksPromise = (async () => {
-    const response = await fetch("http://localhost:5000/tasks");
+  const fetchTasksPromise = async () => {
+    const response = await fetch(`http://localhost:5000/tasks?_sort=${sort}`);
     const tasks: ITask[] = await response.json();
 
     return tasks;
-  })();
+  };
+
+  const fetchTasksCallback = useCallback(() => fetchTasksPromise(), [sort]);
 
   return (
-    <div className="task-list" key={version}>
+    <div key={version}>
       <div className="task-list__header">
         <h1>Task List</h1>
         <Button
@@ -49,9 +68,22 @@ export function TaskListContainer() {
 
       <ErrorBoundary FallbackComponent={ErrorFallback}>
         <Suspense fallback={<div>Loading...</div>}>
-          <TaskList fetchTasks={fetchTasksPromise} />
+          <TaskList fetchTasks={fetchTasksCallback()} />
         </Suspense>
       </ErrorBoundary>
+    </div>
+  );
+}
+
+export function TaskListWrapper() {
+  const [order, setOrder] = useState("asc");
+  const deferredOrder = useDeferredValue(order);
+  const sort = deferredOrder === "asc" ? "task" : "-task";
+
+  return (
+    <div className="task-list">
+      <Select options={options} value={order} handleOnChange={setOrder} />
+      <TaskListContainer sort={sort} />
     </div>
   );
 }
